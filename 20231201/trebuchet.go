@@ -110,6 +110,7 @@ func CombineIndexes(s string) int {
 func main() {
 	file, err := os.Open("input")
 	check(err)
+	defer file.Close()
 
 	var firstTotal int = 0
 	var secondTotal int = 0
