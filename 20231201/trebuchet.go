@@ -8,8 +8,6 @@ import (
     "strconv"
 )
 
-type Number int
-
 var numbers = []string {
    "one", "two", "three", "four", "five",
    "six", "seven", "eight", "nine",
