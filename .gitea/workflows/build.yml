@@ -10,8 +10,6 @@ jobs:
               uses: actions/setup-go@v3
               with:
                   go-version: '1.21.x'
-            - name: Install dependencies
-              run: go get .
             - name: Build
               run: go build -v ./20231201/trebuchet.go
             - name: Display Go version
