@@ -11,7 +11,7 @@ jobs:
               with:
                   go-version: '1.21.x'
             - name: Build
-              run: go build -v ./...
+              run: go build -v ./*/
             - name: Display Go version
               run: go version
             - name: List files in the repository
