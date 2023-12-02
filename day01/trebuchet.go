@@ -109,7 +109,7 @@ func CombineIndexes(s string) int {
 }
 
 func main() {
-	file, err := os.Open("../inputs/day01_input")
+	file, err := os.Open("./day01_input")
 	check(err)
 	defer file.Close()
 
