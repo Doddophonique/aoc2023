@@ -15,4 +15,6 @@ jobs:
           - name: Install dependencies
             run: go get .
           - name: Build
-            run: go build -v ./*/*.go
+            run: go build -v ./20231201/trebuchet.go
+          - name: Display Go version
+            run: go version
