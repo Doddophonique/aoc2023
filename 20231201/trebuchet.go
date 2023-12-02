@@ -13,6 +13,7 @@ var numbers = []string {
    "six", "seven", "eight", "nine",
 }
 
+// Panic if err
 func check(e error) {
     if e != nil {
         panic(e)
