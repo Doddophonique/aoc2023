@@ -1,5 +1,8 @@
 name: Build
-on: [push]
+on:
+    push:
+        tags:
+          - "^test$"
 jobs:
     gobuild:
         runs-on: ubuntu-latest
