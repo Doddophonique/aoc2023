@@ -18,7 +18,7 @@ jobs:
               run: |
                   ls ${{ github.workspace }}
             - name: Test with Go
-              run: go test -json > TestResults-${{ matrix.go-version }}.json
+              run: go test ./*/*.go -json > TestResults-${{ matrix.go-version }}.json
             - name: Upload Go test results
               uses: actions/upload-artifact@v3
               with:
