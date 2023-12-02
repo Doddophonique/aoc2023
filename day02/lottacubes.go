@@ -81,12 +81,11 @@ func findMinimumSet(mySet map[string]int, m *minimumSet) {
 }
 
 func PossibleGamesSum(s string, gn int, gt *int) {
-    var isPossible possibleGame
     // Initialize everything to true. If everything was set to false,
     // we would have to check in both directions for every pass
-    isPossible.redIsPossible 	= true
-    isPossible.greenIsPossible 	= true
-    isPossible.blueIsPossible 	= true
+    isPossible := possibleGame{redIsPossible: true,
+        					   greenIsPossible: true,
+        					   blueIsPossible: true}  
     // We will pass a pointer so we can go one map at a time and
     // still maintain the results
     var isPossiblePoint *possibleGame
@@ -129,8 +128,8 @@ func PowerSetsSum(s string, pt *int) {
     for i := 0; i < numSets; i++ {
         // We create a map
         mySet = newGameSet(sets[i])
-        // We check if the game is possible
-        findMinimumSet(mySet, minSetPoint)
+		// We find the minimum set
+		findMinimumSet(mySet, minSetPoint)
     }
     *pt += (minSet.red * minSet.green * minSet.blue)
 }
