@@ -140,7 +140,7 @@ func PrintAndWait[T any](x T) {
 }
 
 func main() {
-	file, err := os.Open("input")
+	file, err := os.Open("../inputs/day02_input")
 	check(err)
 	defer file.Close()
 
