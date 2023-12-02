@@ -10,8 +10,9 @@ jobs:
               uses: actions/setup-go@v3
               with:
                   go-version: '1.21.x'
-            - name: Build
+            - name: Build day one
               run: go build -v ./day01/*.go
+            - name: Build day two
               run: go build -v ./day02/*.go
             - name: Display Go version
               run: go version
