@@ -6,8 +6,8 @@ jobs:
     gobuild:
         runs-on: ubuntu-latest
         steps:
-       	  - name: Checkout
-           	uses: actions/checkout@v3
+          - name: Checkout
+            uses: actions/checkout@v3
           - name: Setup Go
             uses: actions/setup-go@v3
             with:
