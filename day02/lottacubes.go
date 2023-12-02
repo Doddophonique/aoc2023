@@ -14,9 +14,10 @@ func check(e error) {
     }
 }
 
-type gameSet struct {
-    nCubes []int
-    color  []string    
+var requiredCubes = map[string]int {
+   "red": 12,
+   "green": 13,
+   "blue": 14,
 }
 
 type possibleGame struct {
@@ -34,49 +35,63 @@ func splitSets (s string) ([]string, int) {
 	return sets, numSets
 }
 
-func newGameSet(s []string, i int) []gameSet {
-    // Make an array of structs as big as we need
-    mySets := make([]gameSet, i)
-    _ = mySets
-	// Iterate the array of strings
-	// e.g., s = 4 red, 5 blue, 7 green
-	for index, set := range s {
-    	// We extract every set
-    	tempNumAndColor := strings.SplitN(set, ",", -1)
-    	_ = index
-    	mySets[index].nCubes = make([]int, len(tempNumAndColor))
-    	mySets[index].color = make([]string, len(tempNumAndColor))
-    	// The order is always number-space-color
-    	// We now populate the struct
-    	for j := 0; j < len(tempNumAndColor); j++ {
-        	// Remove leading whitespace
-        	TrimmedNumColor := strings.Trim(tempNumAndColor[j], " ")
-        	// Split into number and color
-        	NumColor := strings.SplitN(TrimmedNumColor, " ", -1)
-        	// [0] is number, [1] is color
-        	mySets[index].nCubes[j], _ = strconv.Atoi(NumColor[0])
-        	mySets[index].color[j] = NumColor[1]
-    	}
+func newGameSet(s string) map[string]int {
+    m := make(map[string]int)
+
+	tempNumColor := strings.SplitN(s, ",", -1)
+	
+    for i := 0; i < len(tempNumColor); i++ {
+        TrimmedNumColor := strings.Trim(tempNumColor[i], " ")
+        NumColor := strings.SplitN(TrimmedNumColor, " ", -1)
+
+        m[NumColor[1]], _ = strconv.Atoi(NumColor[0])
+    }
+
+    return m
+}
+func CheckGame(mySet map[string]int, p *possibleGame) {
+
+	if (mySet["red"] > requiredCubes["red"]) {
+    	p.redIsPossible = false
 	}
-	return mySets
+	if (mySet["green"] > requiredCubes["green"]) {
+    	p.greenIsPossible = false
+	}
+	if (mySet["blue"] > requiredCubes["blue"]) {
+    	p.blueIsPossible = false
+	}
 }
 
-func CheckGame(mySets []gameSet) bool {
-
-    return false
-}
-
-func PossibleGamesSum(s string) bool {
+func PossibleGamesSum(s string, gn int, gt *int) {
+    var isPossible possibleGame
+    // Initialize everything to true. If everything was set to false,
+    // we would have to check in both directions for every pass
+    isPossible.redIsPossible 	= true
+    isPossible.greenIsPossible 	= true
+    isPossible.blueIsPossible 	= true
+    // We will pass a pointer so we can go one map at a time and
+    // still maintain the results
+    var isPossiblePoint *possibleGame
+    isPossiblePoint = &isPossible
     // We receive a string with the sets, not split
     // We proceed to split
     sets, numSets := splitSets(s)
     // We received a []string with sets and the number of sets
-    // Now it's time to create a struct
-    mySets := newGameSet(sets, numSets)
-    isPossible := CheckGame(mySets)
-	_ = isPossible
-    return false
-    
+    // Now it's time to create a map
+    var mySet map[string]int
+    // For every set we have in the current game
+    for i := 0; i < numSets; i++ {
+        // We create a map
+        mySet = newGameSet(sets[i])
+        // We check if the game is possible
+        CheckGame(mySet, isPossiblePoint)
+    }
+
+	if 	(isPossible.redIsPossible == true) &&
+		(isPossible.greenIsPossible == true) &&
+		(isPossible.blueIsPossible == true) {
+    		*gt += gn
+		} 
 }
 
 func PrintAndWait[T any](x T) {
@@ -91,6 +106,12 @@ func main() {
 
 	// This variable will hold the game number
 	var gameNum int = 0
+	// This variable will hold the pointer of the sum of possible games
+	var gameSumPoint *int
+	gameSum := 0
+	gameSumPoint = &gameSum
+	
+	
 	_ = gameNum
 	scanner := bufio.NewScanner(file)
 
@@ -102,6 +123,7 @@ func main() {
     	// We convert the number that remains after replacing "Game " with ""
     	gameNum, _ = strconv.Atoi(strings.Replace(gameAndCubes[0], "Game ", "", 1))
     	// Now, for every game, split the sets
-    	PossibleGamesSum(gameAndCubes[1]) 
+    	PossibleGamesSum(gameAndCubes[1], gameNum, gameSumPoint)
 	}
+	fmt.Printf("The sum of possible games is: %d\n", gameSum) 
 }
