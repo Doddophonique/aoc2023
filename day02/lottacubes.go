@@ -26,6 +26,12 @@ type possibleGame struct {
     blueIsPossible	bool
 }
 
+type minimumSet struct {
+    red 	int
+    green 	int
+    blue 	int
+}
+
 func splitSets (s string) ([]string, int) {
 	// Every set is divided by ;
 	sets := strings.SplitN(s, ";", -1)
@@ -62,6 +68,18 @@ func CheckGame(mySet map[string]int, p *possibleGame) {
 	}
 }
 
+func findMinimumSet(mySet map[string]int, m *minimumSet) {
+    if (mySet["red"] > m.red) {
+        m.red = mySet["red"]
+    }
+    if (mySet["green"] > m.green) {
+        m.green = mySet["green"] 
+    }
+    if (mySet["blue"] > m.blue) {
+        m.blue = mySet["blue"] 
+    }
+}
+
 func PossibleGamesSum(s string, gn int, gt *int) {
     var isPossible possibleGame
     // Initialize everything to true. If everything was set to false,
@@ -94,6 +112,29 @@ func PossibleGamesSum(s string, gn int, gt *int) {
 		} 
 }
 
+func PowerSetsSum(s string, pt *int) {
+    // In this case, we need an array of integers
+    minSet :=  minimumSet{red: 0, green: 0, blue: 0}
+
+    var minSetPoint *minimumSet
+    minSetPoint = &minSet
+
+    // We receive a string with the sets, not split
+    // We proceed to split
+    sets, numSets := splitSets(s)
+    // We received a []string with sets and the number of sets
+    // Now it's time to create a map
+    var mySet map[string]int
+    // For every set we have in the current game
+    for i := 0; i < numSets; i++ {
+        // We create a map
+        mySet = newGameSet(sets[i])
+        // We check if the game is possible
+        findMinimumSet(mySet, minSetPoint)
+    }
+    *pt += (minSet.red * minSet.green * minSet.blue)
+}
+
 func PrintAndWait[T any](x T) {
     fmt.Print(x)
     fmt.Scanln() 
@@ -110,7 +151,11 @@ func main() {
 	var gameSumPoint *int
 	gameSum := 0
 	gameSumPoint = &gameSum
-	
+
+	// Variable for the sum of the power of the sets
+	var power int = 0
+	// Pointer to power, nice variable name
+	var powerPoint *int = &power
 	
 	_ = gameNum
 	scanner := bufio.NewScanner(file)
@@ -124,6 +169,8 @@ func main() {
     	gameNum, _ = strconv.Atoi(strings.Replace(gameAndCubes[0], "Game ", "", 1))
     	// Now, for every game, split the sets
     	PossibleGamesSum(gameAndCubes[1], gameNum, gameSumPoint)
+    	PowerSetsSum(gameAndCubes[1], powerPoint) 
 	}
-	fmt.Printf("The sum of possible games is: %d\n", gameSum) 
+	fmt.Printf("The sum of possible games is: %d\n", gameSum)
+	fmt.Printf("The sum of the power of sets is: %d\n", power)
 }
