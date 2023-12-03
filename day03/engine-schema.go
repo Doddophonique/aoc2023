@@ -16,7 +16,7 @@ func check(e error) {
     }
 }
 
-func PrintAndWait[T any](x T) {
+func PrintAndWait(x ...any) {
     fmt.Print(x)
     fmt.Scanln() 
 }
@@ -61,8 +61,26 @@ func main() {
 		tempSymbols := resym.FindAllString(lines[i], -1)
 		// We associate symbols with an index
 		tempSymbolsIndex := resym.FindAllStringIndex(lines[i], -1)
+		PrintAndWait(i, "First loop.")
+		// A line can contain 0 symbols
+		if len(tempSymbols) == 0 {
+    		symbols[i] = make([]string, 0)
+    		symbolsIndex[i] = make([]int, 0) 
+		} 
 		// Add symbols and indexes to the arrays
-		symbols = append(symbols, tempSymbols)
+		for j := 0; j < len(tempSymbols); j++ {
+    		PrintAndWait(i, j, "Second loop.") 
+			symbols[i] = append(symbols[i], tempSymbols[j])
+		}
+		for j:= 0; j < len(tempSymbolsIndex); j++ {
+    		PrintAndWait(i, j, "Third loop.")
+    		PrintAndWait(tempSymbolsIndex) 
+			symbolsIndex[i] = append(symbolsIndex[i], tempSymbolsIndex[j][0])
+			symbolsIndex[i] = append(symbolsIndex[i], tempSymbolsIndex[j][1])
+		}
+		PrintAndWait(symbols)
+		PrintAndWait(symbolsIndex) 
 		//symbolsIndex = append(symbolsIndex, tempSymbolsIndex) 
 	}
+	PrintAndWait(numbers) 
 }
