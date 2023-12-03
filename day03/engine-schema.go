@@ -79,7 +79,6 @@ func main() {
 			   }
     	}
 	}
-	PrintAndWait(totalSum) 
 	// Now we loop from 1 to (last index - i)
 	for i := 1; i < len(lines) - 1; i++ {
     	// We need to check the current line against an interval of three lines
@@ -89,33 +88,25 @@ func main() {
     	previousLineIndex := resym.FindAllStringIndex(lines[i - 1], -1)
     	currentLineIndex := resym.FindAllStringIndex(lines[i], -1)
     	nextLineIndex := resym.FindAllStringIndex(lines[i + 1], -1)
-    	PrintAndWait("i: ", i)
 OuterLoop:
     	for k := range currentLineNums {
-        	PrintAndWait("k: ", k, currentLineNums) 
     		for j := range previousLineIndex {
-        		PrintAndWait("prev j: ", j, previousLineIndex) 
         		if previousLineIndex[j][0] >= currentLineNums[k][0] - 1 &&
         			previousLineIndex[j][0] <= currentLineNums[k][1] {
-            			PrintAndWait(numbers[i][k]) 
             			totalSum += numbers[i][k]
             			continue OuterLoop
         			} 
     		}
     		for j := range currentLineIndex {
-        		PrintAndWait("cur j: ", j, currentLineIndex) 
         		if currentLineIndex[j][0] >= currentLineNums[k][0] - 1 &&
         			currentLineIndex[j][0] <= currentLineNums[k][1] {
-            			PrintAndWait(numbers[i][k]) 
             			totalSum += numbers[i][k]
             			continue OuterLoop
         			} 
     		}
     		for j := range nextLineIndex {
-        		PrintAndWait("next j: ", j, nextLineIndex) 
         		if nextLineIndex[j][0] >= currentLineNums[k][0] - 1 &&
         			nextLineIndex[j][0] <= currentLineNums[k][1] {
-            			PrintAndWait(numbers[i][k]) 
             			totalSum += numbers[i][k]
             			continue OuterLoop
         			} 
@@ -132,26 +123,17 @@ OuterLoop:
 	// a symbol in a specific interval of numbers. If you find a match, you
 	// can break as you just need one symbol
 	for i := range lastLineNums {
-    	PrintAndWait("i: ", i, lastLineNums) 
     	for j := range lastLineSymbolsIndex {
-        	PrintAndWait("last j: ", j, notLastLineSymbolsIndex) 
 			if lastLineSymbolsIndex[j][0] >= lastLineNums[i][0] - 1 &&
 			   (lastLineSymbolsIndex[j][0] <= lastLineNums[i][1]) {
-    			   PrintAndWait(numbers[len(lines) - 1][i])
-    			   PrintAndWait(totalSum) 
     			   totalSum += numbers[len(lines) - 1][i]
-    			   PrintAndWait(totalSum) 
     			   break
 			   }
     	}
     	for j := range notLastLineSymbolsIndex {
-        	PrintAndWait("notlast j: ", j, notLastLineSymbolsIndex) 
 			if (notLastLineSymbolsIndex[j][0] >= lastLineNums[i][0] - 1) &&
 			   (notLastLineSymbolsIndex[j][0] <= lastLineNums[i][1]) {
-    			   PrintAndWait(numbers[len(lines) - 1][i])
-    			   PrintAndWait(totalSum) 
     			   totalSum += numbers[len(lines) - 1][i]
-    			   PrintAndWait(totalSum) 
     			   break
 			   }
     	}
