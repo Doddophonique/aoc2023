@@ -7,7 +7,7 @@ import (
     "bufio"
     "os"
     "regexp"
-    "strconv"
+//    "strconv"
 )
 
 func check(e error) {
@@ -22,7 +22,7 @@ func PrintAndWait(x ...any) {
 }
 
 func main() {
-	file, err := os.Open("./inputs/day03_test_input")
+	file, err := os.Open("./inputs/day03_input")
 	check(err)
 	defer file.Close()
 
@@ -38,7 +38,25 @@ func main() {
     	lines = append(lines, scanner.Text())
 	}
 	numLines := len(lines)
+	numbers := make([][]int, numLines)
+	_ = numbers
 
+	/* 	Line [0] needs to check only line 1 for symbols.
+		Similarly, the last line needs to check only
+		(last line index - 1) for symbols.
+		So we first check the line [0], then start a loop
+		from 1 to (last line index - 1)
+	*/
+	firstLineNums 			:= renum.FindAllStringIndex(lines[0], -1)
+	firstLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[0], -1)
+	secondLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[1], -1)
+
+	PrintAndWait(firstLineNums)
+	PrintAndWait(firstLineSymbolsIndex) 
+	PrintAndWait(secondLineSymbolsIndex)
+
+	
+	/* This code may need to be scrapped, not sure yet.
 	// The 2D array of numbers will hold all the numbers to easily
 	// match them with corresponding strings in the file using the index
 	numbers := make([][]int, numLines)
@@ -50,37 +68,5 @@ func main() {
     		numbers[i] = append(numbers[i], num)
     	}
 	}
-
-	// We store the index of a symbol on the line it appears
-	symbolsIndex 	:= make([][]int, numLines)
-	symbols 		:= make([][]string, numLines) 
-	_ = symbolsIndex
-	// For every line
-	for i := 0; i < numLines; i++ {
-		// We put all the symbols in a string
-		tempSymbols := resym.FindAllString(lines[i], -1)
-		// We associate symbols with an index
-		tempSymbolsIndex := resym.FindAllStringIndex(lines[i], -1)
-		PrintAndWait(i, "First loop.")
-		// A line can contain 0 symbols
-		if len(tempSymbols) == 0 {
-    		symbols[i] = make([]string, 0)
-    		symbolsIndex[i] = make([]int, 0) 
-		} 
-		// Add symbols and indexes to the arrays
-		for j := 0; j < len(tempSymbols); j++ {
-    		PrintAndWait(i, j, "Second loop.") 
-			symbols[i] = append(symbols[i], tempSymbols[j])
-		}
-		for j:= 0; j < len(tempSymbolsIndex); j++ {
-    		PrintAndWait(i, j, "Third loop.")
-    		PrintAndWait(tempSymbolsIndex) 
-			symbolsIndex[i] = append(symbolsIndex[i], tempSymbolsIndex[j][0])
-			symbolsIndex[i] = append(symbolsIndex[i], tempSymbolsIndex[j][1])
-		}
-		PrintAndWait(symbols)
-		PrintAndWait(symbolsIndex) 
-		//symbolsIndex = append(symbolsIndex, tempSymbolsIndex) 
-	}
-	PrintAndWait(numbers) 
+	*/
 }
