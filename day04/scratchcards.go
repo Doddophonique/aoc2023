@@ -51,8 +51,11 @@ func CalcTickets(s []string, index int, tpr []int ) {
 	myNumbers, winningNumbers := SplitSets(s)
 	matches := FindMatches(myNumbers, winningNumbers)
 	if (matches > 0) {
-    	for i := index; i < index + matches; i++ {
-        	tpr[i+1] += 1
+    	for j := 0; j < tpr[index]; j++ {
+        	for i := index; i < index + matches; i++ {
+            	tpr[i+1] += 1
+        	}
+        	
     	}
 	}
 }
@@ -100,9 +103,7 @@ func main() {
     	// We don't need this information (yet?)
     	allNumbers := strings.Split(cardAndNumbers[1], "|")
     	CalcScore(allNumbers, totalPoint)
-    	for j := 0; j < ticketsPerRow[i]; j++ {
-        	CalcTickets(allNumbers, i, tprPoint)
-    	}
+    	CalcTickets(allNumbers, i, tprPoint)
 	}
 
 	numTickets := 0
