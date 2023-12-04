@@ -21,7 +21,7 @@ func PrintAndWait(x ...any) {
 }
 // ScanTwoLines takes `lines` and `index` to scan lines[index]
 // and lines[index + 1]
-func ScanTwoLines(lines []string, index int) {
+func ScanTwoLines(lines []string, index int, numbers [][]int,  totalSum *int) {
     
 	renum := regexp.MustCompile("[0-9]+")
 	resym := regexp.MustCompile("[^0-9.]+")
@@ -36,14 +36,14 @@ func ScanTwoLines(lines []string, index int) {
     	for j := range firstLineSymbolsIndex {
 			if firstLineSymbolsIndex[j][index] >= firstLineNums[i][index] - 1 &&
 			   (firstLineSymbolsIndex[j][index] <= firstLineNums[i][index + 1]) {
-    			   totalSum += numbers[index][i]
+    			   *totalSum += numbers[index][i]
     			   break
 			   }
     	}
     	for j := range secondLineSymbolsIndex {
 			if (secondLineSymbolsIndex[j][index] >= firstLineNums[i][index] - 1)  &&
 			   (secondLineSymbolsIndex[j][index] <= firstLineNums[i][index + 1]) {
-    			   totalSum += numbers[index][i]
+    			   *totalSum += numbers[index][i]
     			   break
 			   }
     	}
@@ -76,7 +76,7 @@ func main() {
 
 	// The 2D array of numbers will hold all the numbers to easily
 	// match them with corresponding strings in the file using the index
-	// For every line in the file, cerate an array of numbers
+	// For every line in the file, create an array of numbers
 	for i := 0; i < numLines; i++ {
     	tempNums := renum.FindAllString(lines[i], -1)
     	for j := 0; j < len(tempNums); j++ {
