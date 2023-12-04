@@ -19,6 +19,40 @@ func PrintAndWait(x ...any) {
     fmt.Print(x)
     fmt.Scanln() 
 }
+// ScanTwoLines takes `lines` and `index` to scan lines[index]
+// and lines[index + 1]
+func ScanTwoLines(lines []string, index int) {
+    
+	renum := regexp.MustCompile("[0-9]+")
+	resym := regexp.MustCompile("[^0-9.]+")
+	firstLineNums 			:= renum.FindAllStringIndex(lines[index], -1)
+	firstLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[index], -1)
+	secondLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[index + 1], -1)
+	// For every *number index range*, check if in the same line there is a
+	// symbol on (first - 1) or (last + 1), check in other lines if there is
+	// a symbol in a specific interval of numbers. If you find a match, you
+	// can break as you just need one symbol
+	for i := range firstLineNums {
+    	for j := range firstLineSymbolsIndex {
+			if firstLineSymbolsIndex[j][index] >= firstLineNums[i][index] - 1 &&
+			   (firstLineSymbolsIndex[j][index] <= firstLineNums[i][index + 1]) {
+    			   totalSum += numbers[index][i]
+    			   break
+			   }
+    	}
+    	for j := range secondLineSymbolsIndex {
+			if (secondLineSymbolsIndex[j][index] >= firstLineNums[i][index] - 1)  &&
+			   (secondLineSymbolsIndex[j][index] <= firstLineNums[i][index + 1]) {
+    			   totalSum += numbers[index][i]
+    			   break
+			   }
+    	}
+	}
+}
+
+func ScanThreeLines() {
+    
+}
 
 func main() {
 	file, err := os.Open("./inputs/day03_input")
