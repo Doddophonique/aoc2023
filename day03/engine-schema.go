@@ -19,39 +19,82 @@ func PrintAndWait(x ...any) {
     fmt.Print(x)
     fmt.Scanln() 
 }
-// ScanTwoLines takes `lines` and `index` to scan lines[index]
-// and lines[index + 1]
-func ScanTwoLines(lines []string, index int, numbers [][]int,  totalSum *int) {
-    
+
+func MatchNumbers(lines []string, index int, ast []int, total *int) {
+   	// Regex that finds the numbers in a row
 	renum := regexp.MustCompile("[0-9]+")
-	resym := regexp.MustCompile("[^0-9.]+")
-	firstLineNums 			:= renum.FindAllStringIndex(lines[index], -1)
-	firstLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[index], -1)
-	secondLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[index + 1], -1)
+    // Gather numbers in prev line
+    prevLine := renum.FindAllStringIndex(lines[index-1], -1)
+    // Gather numbers in this line
+    thisLine := renum.FindAllStringIndex(lines[index], -1) 
+    // Gather numbers in next line
+    nextLine := renum.FindAllStringIndex(lines[index+1], -1)
+    // Calculate the number of numbers in three lines
+    totalNumbers := len(prevLine) + len(thisLine) + len(nextLine)
+
+	// Now we create a big array with all the indexes
+	allIndexes := prevLine
+	for i := range thisLine {
+    	allIndexes = append(allIndexes, thisLine[i])
+	}
+	for i := range nextLine {
+    	allIndexes = append(allIndexes, nextLine[i]) 
+	}
+
+	// Now we create a big array with all the numbers
+	// We start from the previous line
+	allNumbers := renum.FindAllString(lines[index-1], -1)
+    thisNums := renum.FindAllString(lines[index], -1)
+    for i := range thisNums {
+        allNumbers = append(allNumbers, thisNums[i]) 
+    }
+    nextNums := renum.FindAllString(lines[index+1], -1)
+    for i := range nextNums {
+        allNumbers = append(allNumbers, nextNums[i]) 
+    }
+	// When we start, we have zero matches
+    matches := 0
+    // We will stop when we encounter two numbers
+    twoNums := [2]int{0, 0}
+    _ = twoNums
+    // Cycling through all numbers, but stopping at two matches
+    for i := 0; i < totalNumbers && matches < 2; i++ {
+        if (ast[0] >= allIndexes[i][0] - 1 && ast[0] <= allIndexes[i][1]) {
+            matches += 1
+            num, _ := strconv.Atoi(allNumbers[i])
+            twoNums[matches - 1] = num
+        }
+    }
+    if(matches == 2) {
+        tempGears := twoNums[0] * twoNums[1]
+        *total += tempGears
+    }
+}
+
+func CheckGears(lines []string) {
+ 	total := 0
+ 	totalPoint := &total
+   	// Regex that finds the numbers in a row
+	//renum := regexp.MustCompile("[0-9]+")
+	// Regex that finds the asterisks in a row
+	resym := regexp.MustCompile("[*]")
+	// For every line starting from the second
+	for i := 0; i < len(lines) - 1; i++ {
+    	// Take the index of the asterisks
+    	asteriskIndex := resym.FindAllStringIndex(lines[i], - 1)
+    	// For every index we get
+    	for j := range asteriskIndex {
+			MatchNumbers(lines, i, asteriskIndex[j], totalPoint) 
+    	}    	
+	}	
+	// firstLineNums 			:= renum.FindAllStringIndex(lines[index], -1)
+	// firstLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[index], -1)
+	// secondLineSymbolsIndex 	:= resym.FindAllStringIndex(lines[index + 1], -1)
 	// For every *number index range*, check if in the same line there is a
 	// symbol on (first - 1) or (last + 1), check in other lines if there is
 	// a symbol in a specific interval of numbers. If you find a match, you
 	// can break as you just need one symbol
-	for i := range firstLineNums {
-    	for j := range firstLineSymbolsIndex {
-			if firstLineSymbolsIndex[j][index] >= firstLineNums[i][index] - 1 &&
-			   (firstLineSymbolsIndex[j][index] <= firstLineNums[i][index + 1]) {
-    			   *totalSum += numbers[index][i]
-    			   break
-			   }
-    	}
-    	for j := range secondLineSymbolsIndex {
-			if (secondLineSymbolsIndex[j][index] >= firstLineNums[i][index] - 1)  &&
-			   (secondLineSymbolsIndex[j][index] <= firstLineNums[i][index + 1]) {
-    			   *totalSum += numbers[index][i]
-    			   break
-			   }
-    	}
-	}
-}
-
-func ScanThreeLines() {
-    
+	fmt.Printf("Total of gears is: %d\n", total) 
 }
 
 func main() {
@@ -173,4 +216,5 @@ OuterLoop:
     	}
 	}
 	fmt.Printf("The total sum is: %d\n", totalSum)
+	CheckGears(lines) 
 }
