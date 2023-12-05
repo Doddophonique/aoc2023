@@ -20,7 +20,7 @@ func PrintAndWait(x ...any) {
     fmt.Scanln() 
 }
 
-func MatchNumbers(lines []string, index int, ast []int) {
+func MatchNumbers(lines []string, index int, ast []int, total *int) {
    	// Regex that finds the numbers in a row
 	renum := regexp.MustCompile("[0-9]+")
     // Gather numbers in prev line
@@ -32,18 +32,48 @@ func MatchNumbers(lines []string, index int, ast []int) {
     // Calculate the number of numbers in three lines
     totalNumbers := len(prevLine) + len(thisLine) + len(nextLine)
 
-    PrintAndWait(ast, "\n", prevLine, "\n", thisLine, "\n", nextLine)
-    PrintAndWait(totalNumbers)
+	// Now we create a big array with all the indexes
+	allIndexes := prevLine
+	for i := range thisLine {
+    	allIndexes = append(allIndexes, thisLine[i])
+	}
+	for i := range nextLine {
+    	allIndexes = append(allIndexes, nextLine[i]) 
+	}
 
+	// Now we create a big array with all the numbers
+	// We start from the previous line
+	allNumbers := renum.FindAllString(lines[index-1], -1)
+    thisNums := renum.FindAllString(lines[index], -1)
+    for i := range thisNums {
+        allNumbers = append(allNumbers, thisNums[i]) 
+    }
+    nextNums := renum.FindAllString(lines[index+1], -1)
+    for i := range nextNums {
+        allNumbers = append(allNumbers, nextNums[i]) 
+    }
+	// When we start, we have zero matches
     matches := 0
+    // We will stop when we encounter two numbers
     twoNums := [2]int{0, 0}
+    _ = twoNums
+    // Cycling through all numbers, but stopping at two matches
     for i := 0; i < totalNumbers && matches < 2; i++ {
-        if ast[0] < 
+        if (ast[0] >= allIndexes[i][0] - 1 && ast[0] <= allIndexes[i][1]) {
+            matches += 1
+            num, _ := strconv.Atoi(allNumbers[i])
+            twoNums[matches - 1] = num
+        }
+    }
+    if(matches == 2) {
+        tempGears := twoNums[0] * twoNums[1]
+        *total += tempGears
     }
 }
 
 func CheckGears(lines []string) {
-
+ 	total := 0
+ 	totalPoint := &total
    	// Regex that finds the numbers in a row
 	//renum := regexp.MustCompile("[0-9]+")
 	// Regex that finds the asterisks in a row
@@ -54,7 +84,7 @@ func CheckGears(lines []string) {
     	asteriskIndex := resym.FindAllStringIndex(lines[i], - 1)
     	// For every index we get
     	for j := range asteriskIndex {
-			MatchNumbers(lines, i, asteriskIndex[j]) 
+			MatchNumbers(lines, i, asteriskIndex[j], totalPoint) 
     	}    	
 	}	
 	// firstLineNums 			:= renum.FindAllStringIndex(lines[index], -1)
@@ -64,6 +94,7 @@ func CheckGears(lines []string) {
 	// symbol on (first - 1) or (last + 1), check in other lines if there is
 	// a symbol in a specific interval of numbers. If you find a match, you
 	// can break as you just need one symbol
+	fmt.Printf("Total of gears is: %d\n", total) 
 }
 
 func main() {
