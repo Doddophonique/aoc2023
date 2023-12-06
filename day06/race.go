@@ -13,11 +13,24 @@ import (
 
 type Race struct {
     mu 				sync.Mutex
-    temp_modify  	int
+    total		  	int
 }
 
-func (r *Race) WeRaceBoys(wg *sync.WaitGroup) {
+func (r *Race) WeRaceBoys(time, distance int, wg *sync.WaitGroup) {
+    // As we just need to find the minimum necessary and then subtract it from
+    // the maximum, probably a good idea starting form the middle
+    tempTime := 0
+    for i := int(time/2); i > 0; i-- {
+        tempDist := i * (time - i)
+        if tempDist <= distance {
+            tempTime = i + 1
+            break
+        }
+    }
+    // If the minimum is tempTime, then the maximum is time - tempTime
+    // time - 2*tempTime is the number of possible victories
     r.mu.Lock()
+    r.total *= (time - (2 * tempTime - 1))
     r.mu.Unlock()
     wg.Done()
 }
@@ -35,12 +48,13 @@ func PrintAndWait(x ...any) {
 
 func main() {
 
-	file, err := os.Open("./inputs/day06_test_input")
+	file, err := os.Open("./inputs/day06_input")
 	check(err)
 	defer file.Close()
 
-	r := Race{}
-	_ = r
+	r := Race{
+		total: 1,
+	}
 
 	var wg sync.WaitGroup
 	_ = wg
@@ -67,5 +81,16 @@ func main() {
     	num, _ = strconv.Atoi(distStr[i])
     	distance = append(distance, num)
 	}
-	PrintAndWait(time, distance) 
+
+	// E.g.: if I hold the button for 1ms and then release it, it will travel at
+	// 1mm/ms fo the remaining amount of seconds.
+	// We can skip the holding down 0 and tMAX ms.
+	// Once we find the MIN amount of ms necessary to win, the limit is
+	// MAX - MIN
+	for i := 0; i < len(time); i++ {
+    	wg.Add(1) 
+    	go r.WeRaceBoys(time[i], distance[i], &wg) 
+	}
+	wg.Wait()
+	PrintAndWait(r.total) 
 }
