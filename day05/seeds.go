@@ -8,8 +8,13 @@ import (
     "os"
     "strconv"
 	"regexp"
+	"sync"
 )
 
+type Minimum struct {
+    mu 		sync.Mutex
+    minimum int
+}
 func check(e error) {
     if e != nil {
         panic(e)
@@ -39,8 +44,37 @@ func GetMaps(scanner *bufio.Scanner, re *regexp.Regexp) [][]int {
  	return tempArray
 }
 
+func (min *Minimum) ParallelMinimum(start, finish int, atrocity [][][]int, wg *sync.WaitGroup) {
+    // We check the array one by one, need a temp array because
+    // SeedToLocation wants it
+    tempNum := make([]int, 1)
+    tempMin := []int{0}
+    _ = tempMin
+    for i := 0; i < finish; i++ {
+        tempNum[0] = start + i
+        tempMin := SeedToLocation(tempNum, atrocity)
+        // Need to modify a shared variable, lock
+        min.mu.Lock()
+        if tempMin[0] < min.minimum {
+            min.minimum = tempMin[0] 
+        }
+        min.mu.Unlock()
+    }
+    // We finished with the Goroutine
+    wg.Done()
+}
+
+func SeedToLocation(seeds []int, atrocity [][][]int) []int {
+	tempRes := seeds
+	for i := range atrocity {
+    	tempRes = NextResource(tempRes, atrocity[i])
+	}
+	return tempRes
+}
+
 func NextResource(previous []int, resource [][]int) []int {
 	tempRes := make([]int, 0)
+	// [0] is dest, [1] is source, [2] is range
     for i := range previous {
         for j := range resource {
         	if previous[i] >= resource[j][1] &&
@@ -48,6 +82,7 @@ func NextResource(previous []int, resource [][]int) []int {
         		tempRes = append(tempRes, previous[i] + (resource[j][0] - resource[j][1]))
         	} 
         }
+        // If we didn't add an element to the array
     	if len(tempRes) == i {
         	tempRes = append(tempRes, previous[i])
     	}
@@ -58,6 +93,12 @@ func main () {
 	file, err := os.Open("./inputs/day05_input")
 	check(err)
 	defer file.Close()
+
+	min := Minimum{
+    	minimum: math.MaxInt,
+	}
+
+	var wg sync.WaitGroup
 
    	// Regex that finds the numbers in a row
 	renum := regexp.MustCompile("[0-9]+")
@@ -87,25 +128,15 @@ func main () {
  	humidities = GetMaps(scanner, renum)
  	locations = GetMaps(scanner, renum)
 
-	// [0] is dest, [1] is source, [2] is range
 	tempRes := make([]int, 0)
-	for i := range seeds {
-    	for j := range soils {
-        	if seeds[i] >= soils[j][1] &&
-        	   seeds[i] <= (soils[j][1] + soils[j][2] - 1) {
-            	   tempRes = append(tempRes, (seeds[i] + (soils[j][0] - soils[j][1]))) 
-        	}
-    	}
-    	if len(tempRes) == i {
-        	tempRes = append(tempRes, seeds[i]) 
-    	}
+	// Actually insane behaviour
+	monster := [][][]int{
+    	soils, fertilizers, waters,
+    	lights, temperatures, humidities,
+    	locations,
 	}
-	tempRes = NextResource(tempRes, fertilizers)
-	tempRes = NextResource(tempRes, waters) 
-	tempRes = NextResource(tempRes, lights) 
-	tempRes = NextResource(tempRes, temperatures) 
-	tempRes = NextResource(tempRes, humidities) 
-	tempRes = NextResource(tempRes, locations)
+	// Send the seeds, receive 
+	tempRes = SeedToLocation(seeds, monster) 
 
 	minimum := math.MaxInt
 	for i := range tempRes {
@@ -113,5 +144,15 @@ func main () {
         	minimum = tempRes[i] 
     	}
 	}
-	PrintAndWait(minimum) 
+	fmt.Printf("Minimum of first part: %d\n", minimum)
+
+	// Actual madness
+	for i := 0; i < len(seeds); i += 2 {
+    	wg.Add(1)
+    	go min.ParallelMinimum(seeds[i], seeds[i+1], monster, &wg) 
+	}	
+
+	wg.Wait()
+	//tempRes = SeedToLocation(allSeeds, monster) 
+	fmt.Printf("Minimum of second part: %d\n", min.minimum)
 }
