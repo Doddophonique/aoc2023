@@ -35,6 +35,32 @@ func (r *Race) WeRaceBoys(time, distance int, wg *sync.WaitGroup) {
     wg.Done()
 }
 
+func MultRaceDist(time, dist []string) ([]int, []int){
+	tempT, tempD := make([]int, 0), make([]int, 0)
+   	for i := range time {
+    	num, _ := strconv.Atoi(time[i])
+    	tempT = append(tempT, num)
+    	num, _ = strconv.Atoi(dist[i])
+    	tempD = append(tempD, num)
+	}
+    return tempT, tempD
+}
+
+func SingleRaceDist(time, dist []string) (int, int) {
+    strT, strD := "", ""
+	numT, numD := 0, 0
+	// Create two big strings
+   	for i := range time {
+		strT += time[i]
+		strD += dist[i]
+   	}
+   	
+   	numT, _ = strconv.Atoi(strT) 
+   	numD, _ = strconv.Atoi(strD) 
+   		
+    return numT, numD
+}
+
 func check(e error) {
     if e != nil {
         panic(e)
@@ -52,16 +78,19 @@ func main() {
 	check(err)
 	defer file.Close()
 
-	r := Race{
+	// Struct for multiple races
+	rMult := Race{
 		total: 1,
 	}
-
+	// Struct for a single race
+	rSing := Race{
+    	total: 1,
+	}
+ 	_ = &rSing
 	var wg sync.WaitGroup
-	_ = wg
 
    	// Regex that finds the numbers in a row
 	renum := regexp.MustCompile("[0-9]+")
-	_ = renum
 
 	scanner := bufio.NewScanner(file)
 	time, distance := make([]int, 0), make([]int, 0)
@@ -74,23 +103,24 @@ func main() {
 	timeStr := renum.FindAllString(tempStrings[0], - 1)
 	distStr := renum.FindAllString(tempStrings[1], - 1)
 
-	// Both should be the same length
-	for i := range timeStr {
-    	num, _ := strconv.Atoi(timeStr[i])
-    	time = append(time, num)
-    	num, _ = strconv.Atoi(distStr[i])
-    	distance = append(distance, num)
-	}
+	time, distance = MultRaceDist(timeStr, distStr)
 
 	// E.g.: if I hold the button for 1ms and then release it, it will travel at
 	// 1mm/ms fo the remaining amount of seconds.
 	// We can skip the holding down 0 and tMAX ms.
 	// Once we find the MIN amount of ms necessary to win, the limit is
 	// MAX - MIN
+   	wg.Add(len(time)) 
 	for i := 0; i < len(time); i++ {
-    	wg.Add(1) 
-    	go r.WeRaceBoys(time[i], distance[i], &wg) 
+    	go rMult.WeRaceBoys(time[i], distance[i], &wg) 
 	}
+
+	// Silly implementation of the single race
+	singT, singD := SingleRaceDist(timeStr, distStr) 
+	wg.Add(1)
+	go rSing.WeRaceBoys(singT, singD, &wg) 
+	
 	wg.Wait()
-	PrintAndWait(r.total) 
+	fmt.Printf("Multiple races result: %d.\n", rMult.total)
+	fmt.Printf("Single race result: %d.\n", rSing.total) 
 }
