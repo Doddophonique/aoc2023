@@ -113,10 +113,10 @@ func ThreeOrTwo(cards string) int {
     for i := range mapSeeds {
         // If an element has 3 values, we have a three of a kind
         if m[i] == 3 {
-            return 4
+            return 3
         /// If an element has 2 values, we have a two pair
         } else if m[i] == 2 {
-            return 3
+            return 2
         }
     }
     return -1
@@ -233,7 +233,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(len(lines))
 	for i := 0; i < len(lines); i++ {
-    	go g.DetermineType(cards[i], i, &wg)
+    	g.DetermineType(cards[i], i, &wg)
 	}
 
 	wg.Wait()
@@ -251,7 +251,7 @@ func main() {
     	g.baseThirteen[i] = make([]int, len(g.typeOfHand[i]))
     	// For every element in a single type of hand
     	for j := range g.typeOfHand[i] {
-			go g.ChangeBase(i, j, &wg) 
+			g.ChangeBase(i, j, &wg) 
     	}
 	}
 	wg.Wait()
