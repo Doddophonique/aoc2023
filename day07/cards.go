@@ -154,7 +154,7 @@ func PrintAndWait(x ...any) {
 
 // https://www.golangprograms.com/golang-program-for-implementation-of-quick-sort.html
 // I need to learn how this shing works
-func quicksort(a []int, g *Game, hType int) []int {
+func quicksort(a, h []int, hType int) []int {
     if len(a) < 2 {
         return a
     }
@@ -164,28 +164,22 @@ func quicksort(a []int, g *Game, hType int) []int {
     pivot := 0
      
     a[pivot], a[right] = a[right], a[pivot]
-    g.mu.Lock()
-    g.indexOfHand[hType][pivot], g.indexOfHand[hType][right] = g.indexOfHand[hType][right], g.indexOfHand[hType][pivot]
-    g.mu.Unlock()
+    h[pivot], h[right] = h[right], h[pivot]
      
     for i, _ := range a {
         if a[i] < a[right] {
             a[left], a[i] = a[i], a[left]
-            g.mu.Lock()
-            g.indexOfHand[hType][left], g.indexOfHand[hType][i] = g.indexOfHand[hType][i], g.indexOfHand[hType][left]
-            g.mu.Unlock()
+            h[left], h[i] = h[i], h[left]
             left++
         }
     }
      
     a[left], a[right] = a[right], a[left]
-    g.mu.Lock()
-    g.indexOfHand[hType][left], g.indexOfHand[hType][right] = g.indexOfHand[hType][right], g.indexOfHand[hType][left]
-    g.mu.Unlock()
+    h[left], h[right] = h[right], h[left]
     
      
-    quicksort(a[:left], g, hType)
-    quicksort(a[left+1:], g, hType)
+    quicksort(a[:left], h[:left], hType)
+    quicksort(a[left+1:], h[left+1:], hType)
      
     return a
 }
@@ -233,7 +227,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(len(lines))
 	for i := 0; i < len(lines); i++ {
-    	g.DetermineType(cards[i], i, &wg)
+    	go g.DetermineType(cards[i], i, &wg)
 	}
 
 	wg.Wait()
@@ -251,24 +245,24 @@ func main() {
     	g.baseThirteen[i] = make([]int, len(g.typeOfHand[i]))
     	// For every element in a single type of hand
     	for j := range g.typeOfHand[i] {
-			g.ChangeBase(i, j, &wg) 
+			go g.ChangeBase(i, j, &wg) 
     	}
 	}
 	wg.Wait()
 
 
-	PrintAndWait(g.typeOfHand[0]) 
-	PrintAndWait(g.typeOfHand[1]) 
-	PrintAndWait(g.typeOfHand[2]) 
-	PrintAndWait(g.typeOfHand[3]) 
-	PrintAndWait(g.typeOfHand[4]) 
-	PrintAndWait(g.typeOfHand[5]) 
-	PrintAndWait(g.typeOfHand[6]) 
+	// PrintAndWait(g.typeOfHand[0]) 
+	// PrintAndWait(g.typeOfHand[1]) 
+	// PrintAndWait(g.typeOfHand[2]) 
+	// PrintAndWait(g.typeOfHand[3]) 
+	// PrintAndWait(g.typeOfHand[4]) 
+	// PrintAndWait(g.typeOfHand[5]) 
+	// PrintAndWait(g.typeOfHand[6]) 
 	// A sort of some kind. Important is to also move the index with the number as
 	// well.
 	//
 	for i := range g.baseThirteen {
-    	quicksort(g.baseThirteen[i], &g, i)    	
+    	quicksort(g.baseThirteen[i], g.indexOfHand[i], i)    	
 	}
 	
 	curRank := 1
@@ -276,12 +270,12 @@ func main() {
 	// Iter every array
 	for i := range g.typeOfHand {
     	for j := range g.typeOfHand[i] {
-			fmt.Printf("For the array %d, element %d, ", i, j)
+			//fmt.Printf("For the array %d, element %d, ", i, j)
         	index := g.indexOfHand[i][j]
-        	fmt.Printf("I gather index %d ", index)
+        	//fmt.Printf("I gather index %d ", index)
         	rank += curRank * bet[index]
-        	fmt.Printf("and finally I multiply %d and %d.\n", curRank, bet[index])
-        	fmt.Scanln() 
+        	//fmt.Printf("and finally I multiply %d and %d.\n", curRank, bet[index])
+        	//fmt.Scanln() 
         	curRank++
     	}
 	}
