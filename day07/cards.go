@@ -259,7 +259,7 @@ func quicksort(a, h []int, hType int) []int {
 
 func main() {
 
-	file, err := os.Open("./inputs/day7_try")
+	file, err := os.Open("./inputs/day07_input")
 	check(err)
 	defer file.Close()
 
