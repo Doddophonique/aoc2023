@@ -13,19 +13,19 @@ import (
 )
 
 var mapSeeds = map[string]int{
-    "A": 13,
-    "K": 12,
-    "Q": 11,
-    "J": 10,
-    "T": 9,
-    "9": 8,
-    "8": 7,
-    "7": 6,
-    "6": 5,
-    "5": 4,
-    "4": 3,
-    "3": 2,
-    "2": 1,
+    "A": 12,
+    "K": 11,
+    "Q": 10,
+    "J": 9,
+    "T": 8,
+    "9": 7,
+    "8": 6,
+    "7": 5,
+    "6": 4,
+    "5": 3,
+    "4": 2,
+    "3": 1,
+    "2": 0,
 }
 
 type Game struct {
@@ -276,8 +276,12 @@ func main() {
 	// Iter every array
 	for i := range g.typeOfHand {
     	for j := range g.typeOfHand[i] {
+			fmt.Printf("For the array %d, element %d, ", i, j)
         	index := g.indexOfHand[i][j]
+        	fmt.Printf("I gather index %d ", index)
         	rank += curRank * bet[index]
+        	fmt.Printf("and finally I multiply %d and %d.\n", curRank, bet[index])
+        	fmt.Scanln() 
         	curRank++
     	}
 	}
