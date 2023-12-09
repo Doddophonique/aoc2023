@@ -22,3 +22,4 @@ go.work
 
 # Problem data
 input*.txt
+inputs/
