@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"time"
 	"regexp"
 	"sync"
 )
@@ -11,13 +12,14 @@ import (
 const LEFT = 'L'
 
 type Nodes struct {
-	mu       sync.Mutex
-	commands []int32
-	singleN  []int32
-	leftN    []int32
-	rightN   []int32
-	index    int
-	steps    uint64
+	mu       	sync.Mutex
+	commands 	[]int32
+	singleN  	[]int32
+	leftN    	[]int32
+	rightN   	[]int32
+	index    	int
+	steps    	uint64
+	allSteps 	[]int
 }
 
 func check(e error) {
@@ -29,6 +31,28 @@ func check(e error) {
 func PrintAndWait(x ...any) {
 	fmt.Print(x...)
 	fmt.Scanln()
+}
+
+// https://siongui.github.io/2017/06/03/go-find-lcm-by-gcd/
+// greatest common divisor (GCD) via Euclidean algorithm
+func GCD(a, b int) int {
+      for b != 0 {
+              t := b
+              b = a % b
+              a = t
+      }
+      return a
+}
+
+// find Least Common Multiple (LCM) via GCD
+func LCM(a, b int, integers ...int) int {
+      result := a * b / GCD(a, b)
+
+      for i := 0; i < len(integers); i++ {
+              result = LCM(result, integers[i])
+      }
+
+      return result
 }
 
 func (n *Nodes) toByteSingle(s string) {
@@ -47,25 +71,71 @@ func (n *Nodes) toByteDuet(s, r string) {
 	for i := len(s) - 1; i >= 0; i-- { 
 		tempL += int32(s[i]) << ((len(s) - 1 - i) * 8)
 		tempR += int32(r[i]) << ((len(s) - 1 - i) * 8)
-		//fmt.Printf("Received %c (%b), now I have %b | ", s[i], s[i], tempL)
-		//fmt.Printf("Received %c (%b), now I have %b\n", r[i], r[i], tempR)
-		//fmt.Scanln() 
 	}
 	n.leftN = append(n.leftN, tempL)
 	n.rightN = append(n.rightN, tempR)
 }
 
-func (n *Nodes) findNext(myN int32) {
+func (n *Nodes) findNext(myN int32) int {
 	//var wg sync.WaitGroup
+	ind := 0
 	for i := 0; i < len(n.singleN); i++ {
     	if myN^n.singleN[i] == 0 {
+        	n.mu.Lock()
         	n.index = i
+        	n.mu.Unlock()
+        	ind = i
         	break
     	}
+	}
+	return ind
+}
+
+func (n *Nodes) findAll(ind int, sp []int, wg *sync.WaitGroup) {
+    index := 0
+    // We only go from the start
+	matching := n.rightN[sp[ind]] 
+	if n.commands[0]^LEFT == 0 {
+		matching = n.leftN[sp[ind]]
+	}
+	index = n.findNext(matching)
+	n.allSteps[ind]++
+	i := 0
+	for {
+		// Every step is in a single direction. For every step, we may need to
+		// scan len(n.singleN) elements.
+		// Circular loop
+		index = n.findNext(matching)
+		// Increment i after finding the match
+		i++
+		i = i % len(n.commands)
+		// By default, we will assume we are on the right
+		matching = n.rightN[index]
+		//PrintAndWait()
+		// If we are not, we are in the left
+		if n.commands[i]^LEFT == 0 {
+			matching = n.leftN[index]
+		}
+		n.allSteps[ind]++
+		// If we find XXZ, end
+		temp := matching & 255		
+		if  temp ^ 'Z' == 0 {
+    		break
+		}
+	}
+	//fmt.Printf("I started from %d, matched at %d, taking %d steps.\n", sp[ind], index, n.allSteps[ind] )
+	wg.Done()
+}
+
+func timer(name string) func() {
+	start := time.Now()
+	return func() {
+		fmt.Printf("%s took %v\n", name, time.Since(start))
 	}
 }
 
 func main() {
+	defer timer ("main")()
 	file, err := os.Open("./inputs/day08_input")
 	check(err)
 	defer file.Close()
@@ -136,4 +206,28 @@ func main() {
 		}
 	}
 	fmt.Printf("\nSteps: %d\n", n.steps)
+	// Now, for the main event
+	// Let's get ready to rumble
+	startPoints := make([]int, 0)
+	for i := 0; i < len(n.singleN); i++ {
+    	// Lets remove all bytes except last 8
+    	temp := n.singleN[i] & 255
+    	if (temp ^ 'A') == 0 {
+        	startPoints = append(startPoints, i) 
+    	}
+	}
+	// Now, from the starting points, we should go and match until
+	// we find a path that ends in Z
+	n.allSteps = make([]int, len(startPoints))
+	var wg sync.WaitGroup
+	for i := 0; i < len(startPoints); i++ {
+    	wg.Add(1)
+    	go n.findAll(i, startPoints, &wg)
+	}
+	wg.Wait()
+	result := 1
+	for i := 0; i < len(n.allSteps); i++ {
+    	result = LCM(result, n.allSteps[i])
+	}
+	fmt.Printf("Steps: %d\n", result) 
 }
