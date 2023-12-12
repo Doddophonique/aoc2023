@@ -1,11 +1,17 @@
 package main
 
-import()
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"sync"
+	"time"
+)
 
 // Parallel code, global vars
 type Nodes struct {
-	mu       	sync.Mutex
-	variable	type
+	mu       sync.Mutex
+	variable int
 }
 
 func check(e error) {
@@ -18,6 +24,7 @@ func PrintAndWait(x ...any) {
 	fmt.Print(x...)
 	fmt.Scanln()
 }
+
 // use defer timer("funcname")() when the function you want to
 // test starts
 func timer(name string) func() {
@@ -31,12 +38,11 @@ func main() {
 	file, err := os.Open("./inputs")
 	check(err)
 	defer file.Close()
-	
+
 	lines := make([]string, 0)
-	
+
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-	    lines = append(lines, scanner.Text())
+		lines = append(lines, scanner.Text())
 	}
-	        
-}   	
+}
